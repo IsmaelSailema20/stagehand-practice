@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "@ai-sdk/google": "^3.0.79",
+    "@browserbasehq/stagehand": "^3.4.0",
+    "dotenv": "^17.4.2",
+    "openai": "^6.39.0",
+    "zod": "^4.4.3"
+  }
+}

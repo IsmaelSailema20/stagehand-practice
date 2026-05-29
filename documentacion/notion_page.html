@@ -1,0 +1,1523 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stagehand - Guía Completa de Automatización y Scraping con IA</title>
+  <!-- Google Fonts: Inter para la tipografía limpia de Notion -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Variables de Tema CSS al estilo Notion */
+    :root {
+      --bg-page: #ffffff;
+      --bg-sidebar: #fbfbfa;
+      --text-main: #37352f;
+      --text-muted: #787774;
+      --text-sidebar: #5f5e5b;
+      --hover-sidebar: #efedea;
+      --border-color: #edece9;
+      --code-bg: #f7f6f3;
+      --code-text: #eb5757;
+      --code-block-bg: #1e1e1e;
+      --code-block-text: #d4d4d4;
+      
+      --callout-blue-bg: #ebf5f7;
+      --callout-blue-border: #c3e1e6;
+      --callout-blue-text: #185b6b;
+      
+      --callout-yellow-bg: #fcf6e5;
+      --callout-yellow-border: #f5ebd0;
+      --callout-yellow-text: #8a611c;
+      
+      --callout-green-bg: #edf6ec;
+      --callout-green-border: #d4edd2;
+      --callout-green-text: #2b593f;
+      
+      --callout-gray-bg: #f1f1ef;
+      --callout-gray-border: #e1e1e0;
+      --callout-gray-text: #4b4a47;
+      
+      --accent-color: #2eaadc;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --transition-speed: 0.2s;
+    }
+
+    [data-theme="dark"] {
+      --bg-page: #191919;
+      --bg-sidebar: #202020;
+      --text-main: #e3e3e3;
+      --text-muted: #9b9b9b;
+      --text-sidebar: #9b9b9b;
+      --hover-sidebar: #2c2c2c;
+      --border-color: #2c2c2c;
+      --code-bg: #2d2d2d;
+      --code-text: #e88383;
+      --code-block-bg: #0f0f0f;
+      --code-block-text: #e3e3e3;
+      
+      --callout-blue-bg: #1a262c;
+      --callout-blue-border: #223843;
+      --callout-blue-text: #529cca;
+      
+      --callout-yellow-bg: #2b241a;
+      --callout-yellow-border: #3d3221;
+      --callout-yellow-text: #d99c38;
+      
+      --callout-green-bg: #1c2a22;
+      --callout-green-border: #243c2c;
+      --callout-green-text: #52a36d;
+      
+      --callout-gray-bg: #222222;
+      --callout-gray-border: #2c2c2c;
+      --callout-gray-text: #9b9b9b;
+      
+      --accent-color: #2eaadc;
+    }
+
+    /* Reset & Estilos Base */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      display: flex;
+      min-height: 100vh;
+      transition: background-color var(--transition-speed), color var(--transition-speed);
+      overflow-x: hidden;
+    }
+
+    /* Estilos del Contenedor Principal (Layout de 2 Columnas) */
+    .app-container {
+      display: flex;
+      width: 100%;
+      position: relative;
+    }
+
+    /* Barra Lateral / Sidebar (Estilo Notion) */
+    aside .sidebar-toggle-btn {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      z-index: 100;
+      background: transparent;
+      border: none;
+      color: var(--text-sidebar);
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--transition-speed);
+    }
+    aside .sidebar-toggle-btn:hover {
+      background: var(--hover-sidebar);
+    }
+
+    aside {
+      width: 240px;
+      background-color: var(--bg-sidebar);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      padding: 48px 12px 20px 12px;
+      transition: width var(--transition-speed), background-color var(--transition-speed);
+      flex-shrink: 0;
+      overflow-y: auto;
+      z-index: 90;
+    }
+
+    .sidebar-closed aside {
+      width: 0;
+      padding: 48px 0 20px 0;
+      overflow: hidden;
+      border-right: none;
+    }
+
+    /* Buscador en Barra Lateral */
+    .search-box {
+      margin-bottom: 20px;
+      position: relative;
+      padding: 0 4px;
+    }
+    .search-input {
+      width: 100%;
+      padding: 8px 12px 8px 30px;
+      border: 1px solid var(--border-color);
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color var(--transition-speed);
+    }
+    .search-input:focus {
+      border-color: var(--accent-color);
+    }
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 14px;
+      pointer-events: none;
+    }
+
+    /* Navegación Sidebar */
+    .sidebar-menu {
+      list-style: none;
+      flex-grow: 1;
+    }
+    .sidebar-item {
+      margin-bottom: 2px;
+    }
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      padding: 6px 10px;
+      color: var(--text-sidebar);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 4px;
+      transition: background var(--transition-speed), color var(--transition-speed);
+    }
+    .sidebar-link:hover {
+      background-color: var(--hover-sidebar);
+      color: var(--text-main);
+    }
+    .sidebar-link svg {
+      margin-right: 8px;
+      width: 16px;
+      height: 16px;
+      opacity: 0.8;
+      flex-shrink: 0;
+    }
+    .sidebar-link.active {
+      background-color: var(--hover-sidebar);
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    /* Footer del Sidebar: Selector de Tema */
+    .sidebar-footer {
+      border-top: 1px solid var(--border-color);
+      padding-top: 15px;
+      margin-top: 15px;
+    }
+    .theme-toggle-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 12px;
+      background-color: var(--bg-page);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background var(--transition-speed), border-color var(--transition-speed);
+    }
+    .theme-toggle-btn:hover {
+      background-color: var(--hover-sidebar);
+    }
+    .theme-toggle-btn svg {
+      margin-right: 8px;
+      width: 16px;
+      height: 16px;
+    }
+
+    /* Área del Contenido Principal */
+    main {
+      flex-grow: 1;
+      height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      scroll-behavior: smooth;
+    }
+
+    /* Imagen de Portada (Cover) */
+    .page-cover {
+      height: 220px;
+      width: 100%;
+      background: linear-gradient(135deg, #2e5bec 0%, #1ecbd6 50%, #fbe84a 100%);
+      background-size: 200% 200%;
+      animation: gradientShift 15s ease infinite;
+      position: relative;
+      flex-shrink: 0;
+    }
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Icono flotante de Notion */
+    .page-icon-container {
+      position: absolute;
+      left: 10%;
+      bottom: -40px;
+      width: 90px;
+      height: 90px;
+      background-color: var(--bg-page);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 52px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      z-index: 10;
+      border: 4px solid var(--bg-page);
+      transition: border var(--transition-speed), background-color var(--transition-speed);
+    }
+
+    /* Contenedor del Cuerpo de la Página */
+    .page-body {
+      max-width: 860px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 60px 40px 100px 40px;
+      flex-grow: 1;
+    }
+
+    /* Cabecera del Artículo */
+    .page-header {
+      margin-bottom: 24px;
+    }
+    .breadcrumbs {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+    .breadcrumbs a {
+      color: inherit;
+      text-decoration: none;
+      transition: color var(--transition-speed);
+    }
+    .breadcrumbs a:hover {
+      color: var(--text-main);
+    }
+    .breadcrumbs span {
+      user-select: none;
+    }
+    .page-title {
+      font-size: 40px;
+      font-weight: 700;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+    }
+
+    /* Propiedades de Notion (Metadatos) */
+    .notion-properties {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      row-gap: 10px;
+      column-gap: 20px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+    .prop-label {
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .prop-label svg {
+      width: 15px;
+      height: 15px;
+      opacity: 0.7;
+    }
+    .prop-val {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .tag {
+      background-color: var(--callout-gray-bg);
+      color: var(--text-main);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      border: 1px solid var(--border-color);
+    }
+    .tag.tag-active {
+      background-color: var(--callout-green-bg);
+      color: var(--callout-green-text);
+      border-color: var(--callout-green-border);
+    }
+    .tag.tag-tech {
+      background-color: var(--callout-blue-bg);
+      color: var(--callout-blue-text);
+      border-color: var(--callout-blue-border);
+    }
+
+    /* Secciones de Contenido */
+    .content-section {
+      margin-bottom: 40px;
+      scroll-margin-top: 40px;
+    }
+    .content-section h2 {
+      font-size: 24px;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 8px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .content-section h3 {
+      font-size: 18px;
+      font-weight: 600;
+      margin: 24px 0 12px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .content-section p {
+      font-size: 15px;
+      line-height: 1.6;
+      margin-bottom: 16px;
+      color: var(--text-main);
+    }
+
+    /* Caja de Destacado / Callouts (Estilo Notion) */
+    .callout {
+      display: flex;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border: 1px solid transparent;
+      align-items: flex-start;
+      gap: 14px;
+      font-size: 14.5px;
+      line-height: 1.5;
+    }
+    .callout-icon {
+      font-size: 20px;
+      line-height: 1;
+      user-select: none;
+    }
+    .callout-content {
+      flex-grow: 1;
+    }
+    .callout-blue {
+      background-color: var(--callout-blue-bg);
+      border-color: var(--callout-blue-border);
+      color: var(--callout-blue-text);
+    }
+    .callout-yellow {
+      background-color: var(--callout-yellow-bg);
+      border-color: var(--callout-yellow-border);
+      color: var(--callout-yellow-text);
+    }
+    .callout-green {
+      background-color: var(--callout-green-bg);
+      border-color: var(--callout-green-border);
+      color: var(--callout-green-text);
+    }
+    .callout-gray {
+      background-color: var(--callout-gray-bg);
+      border-color: var(--callout-gray-border);
+      color: var(--callout-gray-text);
+    }
+
+    /* Base de Datos / Tablas en Notion */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      margin: 20px 0;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: var(--bg-page);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+      text-align: left;
+    }
+    th {
+      background-color: var(--bg-sidebar);
+      color: var(--text-muted);
+      font-weight: 600;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border-color);
+      user-select: none;
+    }
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Listas de Tareas Interactiva (Checkbox de Notion) */
+    .checklist {
+      list-style: none;
+      margin-bottom: 20px;
+    }
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 4px;
+      font-size: 14.5px;
+      cursor: pointer;
+      user-select: none;
+      border-radius: 4px;
+      transition: background var(--transition-speed);
+    }
+    .checklist-item:hover {
+      background-color: var(--hover-sidebar);
+    }
+    .checklist-checkbox {
+      width: 16px;
+      height: 16px;
+      border: 1.5px solid var(--text-muted);
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+    }
+    .checklist-checkbox::after {
+      content: '✓';
+      font-size: 11px;
+      color: white;
+      display: none;
+      font-weight: bold;
+    }
+    .checklist-item.checked .checklist-checkbox {
+      background-color: var(--accent-color);
+      border-color: var(--accent-color);
+    }
+    .checklist-item.checked .checklist-checkbox::after {
+      display: block;
+    }
+    .checklist-item.checked .checklist-text {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+    .checklist-text {
+      transition: color var(--transition-speed);
+    }
+
+    /* Bloques de Código */
+    .code-wrapper {
+      position: relative;
+      margin: 16px 0 24px 0;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .code-header {
+      background-color: #2a2a2a;
+      color: #9b9b9b;
+      font-size: 12px;
+      padding: 8px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #3a3a3a;
+      user-select: none;
+    }
+    .copy-btn {
+      background: transparent;
+      border: 1px solid #4a4a4a;
+      color: #e3e3e3;
+      padding: 3px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .copy-btn:hover {
+      background-color: #3d3d3d;
+      border-color: #6a6a6a;
+    }
+    pre {
+      background-color: var(--code-block-bg);
+      padding: 16px;
+      overflow-x: auto;
+      margin: 0;
+    }
+    code {
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 13.5px;
+      color: var(--code-block-text);
+      line-height: 1.5;
+    }
+    
+    /* Resaltador de código simple */
+    .keyword { color: #f97583; font-weight: 500; }
+    .string { color: #9ecbff; }
+    .comment { color: #6a737d; font-style: italic; }
+    .function { color: #b392f0; }
+    .number { color: #ffab70; }
+
+    /* Código en Línea (Inline Code) */
+    code.inline-code {
+      background-color: var(--code-bg);
+      color: var(--code-text);
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-size: 13.5px;
+      font-family: inherit;
+      font-family: 'Courier New', Courier, monospace;
+      word-break: break-all;
+    }
+
+    /* Acordeones / Toggles (Details de Notion) */
+    details {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 15px;
+      background-color: var(--bg-page);
+      transition: border-color var(--transition-speed);
+    }
+    details[open] {
+      border-color: var(--accent-color);
+    }
+    summary {
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      outline: none;
+      user-select: none;
+      color: var(--text-main);
+    }
+    details .details-content {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    /* Galería de Evidencias (Capturas) */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .gallery-card {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+      background-color: var(--bg-sidebar);
+      transition: transform 0.2s, box-shadow 0.2s, border-color var(--transition-speed);
+      position: relative;
+    }
+    .gallery-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.06);
+      border-color: var(--accent-color);
+    }
+    .gallery-card-img-wrapper {
+      height: 140px;
+      background-color: #e5e5e5;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .gallery-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s;
+    }
+    .gallery-card:hover img {
+      transform: scale(1.05);
+    }
+    .gallery-card-info {
+      padding: 12px;
+    }
+    .gallery-card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 4px;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+    .gallery-card-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Lightbox para ampliar capturas */
+    .lightbox {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.85);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .lightbox.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .lightbox-content {
+      max-width: 90%;
+      max-height: 85%;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .lightbox img {
+      max-width: 100%;
+      max-height: 80vh;
+      border-radius: 6px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      object-fit: contain;
+    }
+    .lightbox-caption {
+      color: #ffffff;
+      margin-top: 15px;
+      font-size: 15px;
+      text-align: center;
+      font-weight: 500;
+    }
+    .lightbox-close-btn {
+      position: absolute;
+      top: -40px;
+      right: 0;
+      background: transparent;
+      border: none;
+      color: #ffffff;
+      font-size: 30px;
+      cursor: pointer;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+    .lightbox-close-btn:hover {
+      opacity: 1;
+    }
+
+    /* Botón flotante para volver arriba */
+    .back-to-top {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: var(--accent-color);
+      color: white;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s, transform 0.2s;
+      z-index: 80;
+    }
+    .back-to-top.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .back-to-top:hover {
+      transform: scale(1.1);
+    }
+
+    /* Estilos Responsivos */
+    @media (max-width: 768px) {
+      aside {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        height: 100%;
+      }
+      .sidebar-open aside {
+        transform: translateX(0);
+      }
+      .page-body {
+        padding: 60px 20px 80px 20px;
+      }
+      .page-icon-container {
+        left: 20px;
+        width: 70px;
+        height: 70px;
+        font-size: 40px;
+        bottom: -30px;
+      }
+      .page-title {
+        font-size: 30px;
+      }
+      .notion-properties {
+        grid-template-columns: 120px 1fr;
+      }
+    }
+  </style>
+</head>
+<body class="sidebar-open" id="body">
+
+  <!-- Botón de Toggle del Sidebar (Flotante arriba a la izquierda) -->
+  <button class="sidebar-toggle-btn" id="toggle-sidebar" title="Alternar barra lateral">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+      <path d="M9 3v18"></path>
+    </svg>
+  </button>
+
+  <div class="app-container" id="app-container">
+    <!-- BARRA LATERAL (SIDEBAR) -->
+    <aside>
+      <!-- Buscador en tiempo real -->
+      <div class="search-box">
+        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.3-4.3"></path>
+        </svg>
+        <input type="text" class="search-input" id="search-input" placeholder="Buscar en la guía...">
+      </div>
+
+      <!-- Menú de Navegación -->
+      <nav>
+        <ul class="sidebar-menu">
+          <li class="sidebar-item">
+            <a href="#resumen" class="sidebar-link active">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+              Resumen Proyecto
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#instalacion" class="sidebar-link">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.29 7 12 12 20.71 7"></polyline><line x1="12" y1="22" x2="12" y2="12"></line></svg>
+              Instalación
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#configuracion" class="sidebar-link">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg>
+              Claves de Entorno
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#scripts" class="sidebar-link">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><code style="font-family: inherit;">&lt;&gt;</code></svg>
+              Base de Scripts
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#detalles-scripts" class="sidebar-link">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+              Detalle y Flujos
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#ejecucion" class="sidebar-link">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              Cómo Ejecutar
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#evidencias" class="sidebar-link">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path></svg>
+              Galería de Evidencias
+            </a>
+          </li>
+          <li class="sidebar-item">
+            <a href="#solucion-problemas" class="sidebar-link">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+              Troubleshooting
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- Selector de Modo de Color (Oscuro / Claro) -->
+      <div class="sidebar-footer">
+        <button class="theme-toggle-btn" id="theme-toggle">
+          <!-- Icono de Sol -->
+          <svg class="sun-icon" style="display: none;" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M20 12h2"></path><path d="M2 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path>
+          </svg>
+          <!-- Icono de Luna -->
+          <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+          </svg>
+          <span id="theme-btn-text">Tema Oscuro</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- CONTENIDO DE LA PÁGINA -->
+    <main id="main-content">
+      <!-- Portada -->
+      <div class="page-cover">
+        <!-- Icono de Página Flotante -->
+        <div class="page-icon-container">🚀</div>
+      </div>
+
+      <div class="page-body">
+        
+        <!-- Cabecera de Documento -->
+        <header class="page-header">
+          <div class="breadcrumbs">
+            <a href="#">Workspaces</a>
+            <span>/</span>
+            <a href="#">Automatización Web</a>
+            <span>/</span>
+            <span>Stagehand & Gemini</span>
+          </div>
+          <h1 class="page-title">Stagehand - Guía Completa de Automatización y Scraping con IA</h1>
+        </header>
+
+        <!-- Propiedades del Documento (Notion Properties) -->
+        <div class="notion-properties">
+          <div class="prop-label">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            Creador
+          </div>
+          <div class="prop-val">Antigravity AI Assistant</div>
+
+          <div class="prop-label">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            Actualizado
+          </div>
+          <div class="prop-val" id="last-updated">2026-05-26</div>
+
+          <div class="prop-label">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10h10V2z"></path><path d="m20 22-5-5"></path><path d="m15 22 5-5"></path><circle cx="17.5" cy="17.5" r="4.5"></circle></svg>
+            Tecnologías
+          </div>
+          <div class="prop-val">
+            <span class="tag tag-tech">Stagehand 3.4.0</span>
+            <span class="tag tag-tech">Playwright</span>
+            <span class="tag tag-tech">Google Gemini API</span>
+            <span class="tag tag-tech">Zod</span>
+            <span class="tag tag-tech">Node.js (ESM)</span>
+          </div>
+
+          <div class="prop-label">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            Estado
+          </div>
+          <div class="prop-val">
+            <span class="tag tag-active">🟢 Completado y Listo</span>
+          </div>
+        </div>
+
+        <!-- SECCIÓN: RESUMEN DEL PROYECTO -->
+        <section class="content-section" id="resumen">
+          <h2>📌 Resumen del Proyecto</h2>
+          <p>
+            El proyecto implementa flujos de automatización web y raspado (scraping) inteligente utilizando 
+            <strong style="color: var(--accent-color);">Stagehand</strong>, un framework de automatización de nivel superior desarrollado por <strong>Browserbase</strong>.
+          </p>
+          <p>
+            A diferencia de Playwright o Selenium clásicos que dependen de selectores de CSS o XPath rígidos y fáciles de romper ante cualquier rediseño, Stagehand utiliza Modelos de Lenguaje Avanzados (LLMs, en este caso <strong>Google Gemini</strong>) para interpretar páginas de manera semántica, realizar clics, rellenar formularios, observar contenidos y extraer datos estructurados directamente mapeados a esquemas de tipado seguro con <strong>Zod</strong>.
+          </p>
+
+          <div class="callout callout-blue">
+            <span class="callout-icon">💡</span>
+            <div class="callout-content">
+              <strong>¿Por qué Stagehand?</strong> Permite programar la automatización mediante directivas en lenguaje natural (ej. <em>"Haz clic en el enlace de la categoría Science"</em>). La IA se encarga de analizar el DOM, calcular cuál es el elemento correcto y disparar el evento del navegador correspondiente.
+            </div>
+          </div>
+        </section>
+
+        <!-- SECCIÓN: REQUISITOS E INSTALACIÓN -->
+        <section class="content-section" id="instalacion">
+          <h2>📦 Requisitos e Instalación</h2>
+          <p>Para ejecutar correctamente este proyecto en tu entorno local, sigue esta guía de instalación rápida paso a paso:</p>
+
+          <!-- Checklist interactivo -->
+          <ul class="checklist">
+            <li class="checklist-item" onclick="toggleChecklist(this)">
+              <div class="checklist-checkbox"></div>
+              <span class="checklist-text">Verificar versión de Node.js (se requiere <code>^20.19.0</code> o <code>>=22.12.0</code>)</span>
+            </li>
+            <li class="checklist-item" onclick="toggleChecklist(this)">
+              <div class="checklist-checkbox"></div>
+              <span class="checklist-text">Instalar las dependencias base en el proyecto (<code>npm install</code>)</span>
+            </li>
+            <li class="checklist-item" onclick="toggleChecklist(this)">
+              <div class="checklist-checkbox"></div>
+              <span class="checklist-text">Obtener una Clave API de Gemini desde <a href="https://aistudio.google.com/" target="_blank" style="color: var(--accent-color);">Google AI Studio</a></span>
+            </li>
+            <li class="checklist-item" onclick="toggleChecklist(this)">
+              <div class="checklist-checkbox"></div>
+              <span class="checklist-text">Crear archivo <code>.env</code> en la raíz del proyecto</span>
+            </li>
+            <li class="checklist-item" onclick="toggleChecklist(this)">
+              <div class="checklist-checkbox"></div>
+              <span class="checklist-text">Configurar la Clave API de Gemini en el archivo <code>.env</code></span>
+            </li>
+          </ul>
+
+          <h3>Comandos de Instalación</h3>
+          <p>Ejecuta este comando en la raíz del proyecto para instalar todas las dependencias necesarias:</p>
+          
+          <div class="code-wrapper">
+            <div class="code-header">
+              <span>Terminal (Bash / PowerShell)</span>
+              <button class="copy-btn" onclick="copyCode(this)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>
+                Copiar
+              </button>
+            </div>
+            <pre><code><span class="comment"># Instalar todas las dependencias listadas en el package.json</span>
+<span class="keyword">npm</span> install
+
+<span class="comment"># Instalación alternativa directa de paquetes mínimos:</span>
+<span class="keyword">npm</span> install @browserbasehq/stagehand dotenv zod @ai-sdk/google</code></pre>
+          </div>
+        </section>
+
+        <!-- SECCIÓN: CONFIGURACIÓN (.ENV) -->
+        <section class="content-section" id="configuracion">
+          <h2>🔑 Configuración del Entorno</h2>
+          <p>
+            El proyecto hace uso de variables de entorno administradas a través del paquete <code class="inline-code">dotenv</code>. 
+            Es estrictamente necesario crear un archivo de configuración para almacenar las credenciales de los proveedores de LLM.
+          </p>
+
+          <div class="callout callout-yellow">
+            <span class="callout-icon">⚠️</span>
+            <div class="callout-content">
+              <strong>Atención:</strong> Nunca subas el archivo <code class="inline-code">.env</code> a repositorios públicos como GitHub. El archivo de entorno contiene tu credencial de pago de API.
+            </div>
+          </div>
+
+          <p>Estructura del archivo <code class="inline-code">.env</code> a crear en la raíz del directorio:</p>
+
+          <div class="code-wrapper">
+            <div class="code-header">
+              <span>.env</span>
+              <button class="copy-btn" onclick="copyCode(this)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>
+                Copiar
+              </button>
+            </div>
+            <pre><code><span class="comment"># Clave de API de Google Gemini (Obtenible en Google AI Studio)</span>
+<span class="keyword">GOOGLE_GENERATIVE_AI_API_KEY</span>=<span class="string">TU_CLAVE_DE_API_DE_GEMINI_AQUI</span></code></pre>
+          </div>
+        </section>
+
+        <!-- SECCIÓN: BASE DE DATOS DE SCRIPTS -->
+        <section class="content-section" id="scripts">
+          <h2>📂 Base de Datos de Scripts del Proyecto</h2>
+          <p>A continuación se listan todos los scripts JavaScript (archivos <code class="inline-code">.mjs</code> utilizando módulos ESM) configurados en el proyecto:</p>
+
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre del Script</th>
+                  <th>Propósito Principal</th>
+                  <th>Modelo LLM</th>
+                  <th>Archivo de Salida</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Demostracion.mjs</strong></td>
+                  <td>Flujo interactivo completo de comercio electrónico sobre catálogo de libros de prueba.</td>
+                  <td><code class="inline-code">google/gemini-3.5-flash</code></td>
+                  <td><code class="inline-code">inventario_extraido.json</code></td>
+                  <td>🟢 Probado exitosamente</td>
+                </tr>
+                <tr>
+                  <td><strong>agente.mjs</strong></td>
+                  <td>Navegación completamente autónoma delegada al agente inteligente de Stagehand.</td>
+                  <td><code class="inline-code">google/gemini-2.5-flash</code></td>
+                  <td>Ninguno (Solo consola)</td>
+                  <td>🟢 Probado exitosamente</td>
+                </tr>
+                <tr>
+                  <td><strong>amazon.mjs</strong></td>
+                  <td>Búsqueda de productos reales, clics y extracción minera de especificaciones en Amazon.</td>
+                  <td><code class="inline-code">google/gemini-2.5-pro</code></td>
+                  <td><code class="inline-code">laptop_amazon.json</code></td>
+                  <td>🟡 Sujeto a CAPTCHA / Bot Det.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- SECCIÓN: DETALLES DE SCRIPTS Y FLUJOS -->
+        <section class="content-section" id="detalles-scripts">
+          <h2>🕹️ Explicación Detallada de Scripts</h2>
+          <p>
+            Cada script aborda un nivel diferente de complejidad y una funcionalidad clave de Stagehand. 
+            A continuación se presenta un desglose técnico de cada uno de ellos:
+          </p>
+
+          <!-- Toggle 1: Demostracion.mjs -->
+          <details open>
+            <summary>📖 1. Demostracion.mjs (Books to Scrape)</summary>
+            <div class="details-content">
+              <p>
+                Este script contiene un flujo extendido y es ideal para entender los 4 pilares operativos que ofrece Stagehand:
+              </p>
+              <ul>
+                <li><strong>Observe:</strong> Analiza visual y estructuralmente la página para buscar categorías de libros (sin selectores XPath/CSS manuales).</li>
+                <li><strong>Act:</strong> Realiza una cadena de interacciones físicas consecutivas en el navegador:
+                  <ul>
+                    <li>Navegación: Hace clic en la categoría <em>"Science"</em>.</li>
+                    <li>Interacción: Hace clic en el título del tercer libro listado.</li>
+                    <li>Carrito: Scrollea y hace clic en <em>"Add to basket"</em> para el segundo libro.</li>
+                    <li>Navegación: Regresa a la página principal del catálogo.</li>
+                  </ul>
+                </li>
+                <li><strong>Extract:</strong> Extrae información de la página mapeándola a un esquema tipado de <strong>Zod</strong>:
+                  <div class="code-wrapper">
+                    <pre><code><span class="keyword">const</span> esquemaInventario = z.object({
+  productos: z.array(
+    z.object({
+      titulo: z.string(),
+      precio: z.string(),
+      enStock: z.boolean(),
+    })
+  )
+});</code></pre>
+                  </div>
+                  Los datos resultantes se vuelcan automáticamente en el archivo <code class="inline-code">inventario_extraido.json</code>.
+                </li>
+                <li><strong>Evals (QA Inteligente):</strong> Implementa lógica de aserciones dinámicas para validar que el texto del carrito contenga elementos agregados, determinando si el test de QA fue superado.</li>
+              </ul>
+              <div class="callout callout-gray">
+                <span class="callout-icon">📷</span>
+                <div class="callout-content">
+                  El script genera evidencias automáticas de cada fase en formato <code class="inline-code">.png</code> dentro del directorio <code class="inline-code">evidencias/</code> utilizando una marca de tiempo para evitar colisiones.
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <!-- Toggle 2: agente.mjs -->
+          <details>
+            <summary>🤖 2. agente.mjs (Agente Autónomo)</summary>
+            <div class="details-content">
+              <p>
+                Demuestra el poder del modo **Agente** en Stagehand. A diferencia del flujo guiado paso a paso, aquí delegamos la toma de decisiones al propio modelo:
+              </p>
+              <div class="code-wrapper">
+                <pre><code><span class="keyword">const</span> agent = stagehand.agent();
+<span class="keyword">await</span> agent.execute(<span class="string">"Navigate to the 'Poetry' category"</span>);</code></pre>
+              </div>
+              <p>
+                El agente inteligente observa la página inicial, calcula el camino para llegar a la categoría "Poetry", interactúa de forma autónoma con los elementos y finaliza cuando ha cumplido la directiva planteada.
+              </p>
+            </div>
+          </details>
+
+          <!-- Toggle 3: amazon.mjs -->
+          <details>
+            <summary>🛒 3. amazon.mjs (Amazon Gaming Laptop Scraper)</summary>
+            <div class="details-content">
+              <p>
+                Muestra la viabilidad de Stagehand en una plataforma e-commerce altamente compleja y protegida como **Amazon**.
+              </p>
+              <ul>
+                <li><strong>Eliminación de Ruidos:</strong> Lanza una orden para cerrar diálogos intrusivos irrelevantes de ubicación o cookies.</li>
+                <li><strong>Búsqueda:</strong> Escribe "laptop gaming" en el buscador y presiona la tecla Enter.</li>
+                <li><strong>Extracción Semántica:</strong> Extrae el nombre, precio, rating de estrellas y especificaciones clave (como procesador, RAM) mapeando a un esquema Zod. Vuelca el resultado en <code class="inline-code">laptop_amazon.json</code>.</li>
+              </ul>
+              <div class="callout callout-yellow">
+                <span class="callout-icon">⚠️</span>
+                <div class="callout-content">
+                  <strong>Medidas Antibots de Amazon:</strong> Dado que corre localmente en tu red, Amazon puede presentar pantallas CAPTCHA o bloquear la navegación de Playwright. Se recomienda utilizar un modelo con mayor capacidad de razonamiento (<code class="inline-code">google/gemini-2.5-pro</code>) y configurar retardos amplios para imitar comportamientos humanos.
+                </div>
+              </div>
+            </div>
+          </details>
+        </section>
+
+        <!-- SECCIÓN: CÓMO EJECUTAR LOS SCRIPTS -->
+        <section class="content-section" id="ejecucion">
+          <h2>🚀 Cómo Ejecutar los Scripts</h2>
+          <p>
+            Una vez instaladas las dependencias y configurado el archivo <code class="inline-code">.env</code> con tu clave de API, puedes arrancar cualquiera de los scripts utilizando Node.js:
+          </p>
+
+          <h3>Ejecutar Demostración Principal (Books to Scrape)</h3>
+          <div class="code-wrapper">
+            <div class="code-header">
+              <span>Terminal</span>
+              <button class="copy-btn" onclick="copyCode(this)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>
+                Copiar
+              </button>
+            </div>
+            <pre><code>node Demostracion.mjs</code></pre>
+          </div>
+
+          <h3>Ejecutar Agente Autónomo</h3>
+          <div class="code-wrapper">
+            <div class="code-header">
+              <span>Terminal</span>
+              <button class="copy-btn" onclick="copyCode(this)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>
+                Copiar
+              </button>
+            </div>
+            <pre><code>node agente.mjs</code></pre>
+          </div>
+
+          <h3>Ejecutar Scraper de Amazon</h3>
+          <div class="code-wrapper">
+            <div class="code-header">
+              <span>Terminal</span>
+              <button class="copy-btn" onclick="copyCode(this)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path></svg>
+                Copiar
+              </button>
+            </div>
+            <pre><code>node amazon.mjs</code></pre>
+          </div>
+        </section>
+
+        <!-- SECCIÓN: GALERÍA DE EVIDENCIAS -->
+        <section class="content-section" id="evidencias">
+          <h2>🖼️ Galería de Evidencias</h2>
+          <p>
+            Los flujos interactivos de automatización de Stagehand guardan capturas de pantalla de sus fases más importantes. 
+            Aquí puedes ver algunas de las capturas generadas localmente en este proyecto (haz clic en ellas para ampliarlas):
+          </p>
+
+          <div class="gallery-grid" id="gallery-container">
+            <!-- Los elementos se rellenarán con javascript dinámicamente si hay evidencias -->
+            <div class="gallery-card" onclick="openLightbox('evidencias/1779810084507_5_evaluacion_final.png', 'Evaluación Final - Demostración Completa')">
+              <div class="gallery-card-img-wrapper">
+                <img src="evidencias/1779810084507_5_evaluacion_final.png" alt="Evaluación Final" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=300&auto=format&fit=crop'">
+              </div>
+              <div class="gallery-card-info">
+                <div class="gallery-card-title">Evaluación Final</div>
+                <div class="gallery-card-meta">5_evaluacion_final.png</div>
+              </div>
+            </div>
+
+            <div class="gallery-card" onclick="openLightbox('evidencias/1779810084141_4_despues_de_extraer.png', 'Extracción de Datos Zod')">
+              <div class="gallery-card-img-wrapper">
+                <img src="evidencias/1779810084141_4_despues_de_extraer.png" alt="Extracción de Datos" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=300&auto=format&fit=crop'">
+              </div>
+              <div class="gallery-card-info">
+                <div class="gallery-card-title">Después de Extraer</div>
+                <div class="gallery-card-meta">4_despues_de_extraer.png</div>
+              </div>
+            </div>
+
+            <div class="gallery-card" onclick="openLightbox('evidencias/1779810054485_5_despues_de_agregar_carrito.png', 'Acción: Añadir al Carrito')">
+              <div class="gallery-card-img-wrapper">
+                <img src="evidencias/1779810054485_5_despues_de_agregar_carrito.png" alt="Añadir al Carrito" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=300&auto=format&fit=crop'">
+              </div>
+              <div class="gallery-card-info">
+                <div class="gallery-card-title">Añadir al Carrito</div>
+                <div class="gallery-card-meta">5_despues_de_agregar_carrito.png</div>
+              </div>
+            </div>
+
+            <div class="gallery-card" onclick="openLightbox('evidencias/1779810077574_pagina_principal.png', 'Navegación: Retorno a Página Principal')">
+              <div class="gallery-card-img-wrapper">
+                <img src="evidencias/1779810077574_pagina_principal.png" alt="Página Principal" onerror="this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=300&auto=format&fit=crop'">
+              </div>
+              <div class="gallery-card-info">
+                <div class="gallery-card-title">Página Principal</div>
+                <div class="gallery-card-meta">pagina_principal.png</div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECCIÓN: SOLUCIÓN DE PROBLEMAS -->
+        <section class="content-section" id="solucion-problemas">
+          <h2>🛠️ Solución de Problemas Comunes (Troubleshooting)</h2>
+          
+          <div class="callout callout-gray">
+            <span class="callout-icon">💡</span>
+            <div class="callout-content">
+              <strong>Error de Credenciales / API Key Inválida:</strong>
+              <p style="margin: 4px 0 0 0; font-size: 13.5px; color: var(--text-main);">
+                Asegúrate de que el archivo se llame exactamente <code class="inline-code">.env</code> y se encuentre en la raíz del proyecto. 
+                Si estás usando PowerShell, verifica la codificación del archivo (debe ser UTF-8 sin BOM).
+              </p>
+            </div>
+          </div>
+
+          <div class="callout callout-gray">
+            <span class="callout-icon">💡</span>
+            <div class="callout-content">
+              <strong>Error de Timeout (Tiempo de espera agotado):</strong>
+              <p style="margin: 4px 0 0 0; font-size: 13.5px; color: var(--text-main);">
+                Si tu conexión es lenta o las páginas demoran en cargar, edita <code class="inline-code">Demostracion.mjs</code> e incrementa el timeout del Stagehand (ej: <code>timeout: 60000</code>).
+              </p>
+            </div>
+          </div>
+
+          <div class="callout callout-gray">
+            <span class="callout-icon">💡</span>
+            <div class="callout-content">
+              <strong>Bloqueo Antibot en Amazon:</strong>
+              <p style="margin: 4px 0 0 0; font-size: 13.5px; color: var(--text-main);">
+                Amazon tiene protecciones robustas contra Playwright Headless. Prueba cambiando la propiedad del modelo a <code class="inline-code">google/gemini-2.5-pro</code> o bien utiliza un navegador persistente con datos de usuario reales, o corre la automatización usando los servicios de la nube de <strong>Browserbase</strong>.
+              </p>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Botón Volver Arriba -->
+  <button class="back-to-top" id="back-to-top-btn" title="Volver al inicio">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="18 15 12 9 6 15"></polyline>
+    </svg>
+  </button>
+
+  <!-- LIGHBOX MODAL PARA IMÁGENES -->
+  <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <div class="lightbox-content" onclick="event.stopPropagation()">
+      <button class="lightbox-close-btn" onclick="closeLightbox()">&times;</button>
+      <img id="lightbox-img" src="" alt="Ampliación de captura">
+      <div class="lightbox-caption" id="lightbox-caption"></div>
+    </div>
+  </div>
+
+  <script>
+    // -------------------------------------------------------------
+    // 1. GESTIÓN DEL TEMA (LIGHT / DARK MODE)
+    // -------------------------------------------------------------
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const body = document.getElementById('body');
+    const themeBtnText = document.getElementById('theme-btn-text');
+    const sunIcon = document.querySelector('.sun-icon');
+    const moonIcon = document.querySelector('.moon-icon');
+
+    // Recupera tema almacenado o usa oscuro por defecto
+    const savedTheme = localStorage.getItem('notion-theme') || 'light';
+    setTheme(savedTheme);
+
+    themeToggleBtn.addEventListener('click', () => {
+      const currentTheme = body.getAttribute('data-theme') || 'light';
+      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+      setTheme(newTheme);
+    });
+
+    function setTheme(theme) {
+      if (theme === 'dark') {
+        body.setAttribute('data-theme', 'dark');
+        sunIcon.style.display = 'block';
+        moonIcon.style.display = 'none';
+        themeBtnText.textContent = 'Tema Claro';
+      } else {
+        body.removeAttribute('data-theme');
+        sunIcon.style.display = 'none';
+        moonIcon.style.display = 'block';
+        themeBtnText.textContent = 'Tema Oscuro';
+      }
+      localStorage.setItem('notion-theme', theme);
+    }
+
+    // -------------------------------------------------------------
+    // 2. ALTERNAR BARRA LATERAL (SIDEBAR COLLAPSE)
+    // -------------------------------------------------------------
+    const toggleSidebarBtn = document.getElementById('toggle-sidebar');
+    const appContainer = document.getElementById('app-container');
+
+    toggleSidebarBtn.addEventListener('click', () => {
+      document.body.classList.toggle('sidebar-closed');
+      document.body.classList.toggle('sidebar-open');
+    });
+
+    // -------------------------------------------------------------
+    // 3. CHECKLIST INTERACTIVO
+    // -------------------------------------------------------------
+    // Recupera el estado de la checklist de localStorage para persistencia
+    document.addEventListener('DOMContentLoaded', () => {
+      const checklistItems = document.querySelectorAll('.checklist-item');
+      checklistItems.forEach((item, idx) => {
+        const isChecked = localStorage.getItem(`checklist-item-${idx}`) === 'true';
+        if (isChecked) {
+          item.classList.add('checked');
+        }
+      });
+      
+      // Coloca la fecha de actualización de hoy en formato legible
+      const dateEl = document.getElementById('last-updated');
+      if (dateEl) {
+        const today = new Date();
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        dateEl.textContent = today.toLocaleDateString('es-ES', options);
+      }
+    });
+
+    function toggleChecklist(element) {
+      element.classList.toggle('checked');
+      // Buscar índice del elemento para persistencia
+      const checklistItems = Array.from(document.querySelectorAll('.checklist-item'));
+      const idx = checklistItems.indexOf(element);
+      localStorage.setItem(`checklist-item-${idx}`, element.classList.contains('checked'));
+    }
+
+    // -------------------------------------------------------------
+    // 4. COPIAR CÓDIGO AL PORTAPAPELES
+    // -------------------------------------------------------------
+    function copyCode(button) {
+      const pre = button.parentElement.nextElementSibling;
+      const code = pre.querySelector('code').innerText;
+      
+      navigator.clipboard.writeText(code).then(() => {
+        const originalText = button.innerHTML;
+        button.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          ¡Copiado!
+        `;
+        button.style.borderColor = 'var(--accent-color)';
+        button.style.color = 'var(--accent-color)';
+        
+        setTimeout(() => {
+          button.innerHTML = originalText;
+          button.style.borderColor = '';
+          button.style.color = '';
+        }, 2000);
+      }).catch(err => {
+        console.error('Error al copiar el código:', err);
+      });
+    }
+
+    // -------------------------------------------------------------
+    // 5. LIGHTBOX PARA CAPTURAS
+    // -------------------------------------------------------------
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const lightboxCaption = document.getElementById('lightbox-caption');
+
+    function openLightbox(imgSrc, captionText) {
+      lightboxImg.src = imgSrc;
+      lightboxCaption.textContent = captionText;
+      lightbox.classList.add('active');
+    }
+
+    function closeLightbox() {
+      lightbox.classList.remove('active');
+    }
+
+    // Cerrar lightbox con tecla Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeLightbox();
+      }
+    });
+
+    // -------------------------------------------------------------
+    // 6. DETECTAR SECCIÓN ACTIVA EN SIDEBAR SEGÚN SCROLL
+    // -------------------------------------------------------------
+    const sections = document.querySelectorAll('.content-section');
+    const navLinks = document.querySelectorAll('.sidebar-link');
+    const mainContent = document.getElementById('main-content');
+
+    mainContent.addEventListener('scroll', () => {
+      let currentSectionId = '';
+      
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const scrollPosition = mainContent.scrollTop + 100;
+        
+        if (scrollPosition >= sectionTop) {
+          currentSectionId = section.getAttribute('id');
+        }
+      });
+
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${currentSectionId}`) {
+          link.classList.add('active');
+        }
+      });
+
+      // Gestionar visibilidad del botón volver arriba
+      const backToTopBtn = document.getElementById('back-to-top-btn');
+      if (mainContent.scrollTop > 300) {
+        backToTopBtn.classList.add('visible');
+      } else {
+        backToTopBtn.classList.remove('visible');
+      }
+    });
+
+    // Evento de clic en botón volver arriba
+    document.getElementById('back-to-top-btn').addEventListener('click', () => {
+      mainContent.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    // -------------------------------------------------------------
+    // 7. BUSCADOR INTERNO EN TIEMPO REAL
+    // -------------------------------------------------------------
+    const searchInput = document.getElementById('search-input');
+    searchInput.addEventListener('input', (e) => {
+      const term = e.target.value.toLowerCase().trim();
+      
+      sections.forEach(section => {
+        const text = section.innerText.toLowerCase();
+        if (text.includes(term)) {
+          section.style.display = '';
+          // Buscar el enlace correspondiente en la barra lateral
+          const link = document.querySelector(`.sidebar-link[href="#${section.id}"]`);
+          if (link) link.parentElement.style.display = '';
+        } else {
+          section.style.display = 'none';
+          const link = document.querySelector(`.sidebar-link[href="#${section.id}"]`);
+          if (link) link.parentElement.style.display = 'none';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
